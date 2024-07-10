@@ -18,22 +18,28 @@ import (
 
 func main() {
 
-	dsn := "user:password@tcp(localhost:3306)/testdb?parseTime=true"
+	// dsn := "user:password@tcp(mysql:3306)/testdb?parseTime=true"
 
-	dbWrapper, err := db.NewMySQLDB(dsn)
+	dbWrapper, err := db.NewMySQLDB()
 	if err != nil {
 		log.Fatalf("Could not connect to the database: %v", err)
 	}
+	defer dbWrapper.DB().Close()
 
 	log.Println("Successfully connected to the database")
 
+	// create  path
+	_, filename, _, ok := runtime.Caller(0)
+	if !ok {
+		log.Fatal("Could not determine current file path")
+	}
+
+	migrationsDir := path.Join(path.Dir(filename), "database/migrations")
+	log.Printf("Migrations directory: %s", migrationsDir)
+
 	// Access the underlying sql.DB using the DB method
 	migrator := migrate.NewMySQLMigrator(dbWrapper.DB()) // Create migrator with the database connection
-
-	_, filename, _, _ := runtime.Caller(0)
-	dir := path.Join(path.Dir(filename), "./database/migrations")
-
-	err = migrator.Up(dir)
+	err = migrator.Up(migrationsDir)
 
 	if err != nil {
 		fmt.Println("Error running migrations up:", err)

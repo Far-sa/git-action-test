@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   mysql:
@@ -9,20 +9,44 @@ services:
     ports:
       - "3306:3306"
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-password"]
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "-u",
+          "root",
+          "-ppassword",
+        ]
       interval: 10s
       timeout: 5s
       retries: 3
+    networks:
+      - mynetwork
     volumes:
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
 
-  # user-service:
-  #   build: .
-  #   depends_on:
-  #     mysql:
-  #       condition: service_healthy
-  #   environment:
-  #     - DATABASE_URL=user:password@tcp(mysql:3306)/testdb?parseTime=true
+  user-service:
+    build: .
+    ports:
+      - "8080:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      - DATABASE_URL=user:password@tcp(mysql:3306)/testdb?parseTime=true
+    networks:
+      - mynetwork
+    volumes:
+      - ./database/migrations:/app/database/migrations
+
+
+networks:
+  mynetwork:
+
+
 
   # user-service:
   #   build: .
@@ -38,6 +62,8 @@ services:
   #     MYSQL_USER: user
   #     MYSQL_PASSWORD: password
 
+  #   networks:
+  #     - mynetwork
   #   volumes:
-  #     - ./database/migrations:/app/migrations
-      
+  #     - ./database/migrations:/migrations
+

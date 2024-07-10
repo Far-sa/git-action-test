@@ -63,60 +63,47 @@ jobs:
           echo "Deploying application..."
           # Add your deployment commands here (e.g., SSH to server and deploy)
 
+#!!!!
+      # - name: Install protoc
+      #   run: |
+      #     sudo apt-get update
+      #     sudo apt-get install -y protobuf-compiler
 
-# name: CI
+      # - name: Install gRPC and gRPC Gateway plugins
+      #   run: |
+      #     go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.28
+      #     go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.2
+      #     go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway@v2.6.0
+      #     go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2@v2.6.0
+      #   env:
+      #     GOBIN: /usr/local/go/bin
+      #     PATH: ${{ runner.tool_cache }}/go/1.17.6/x64/bin:${{ github.workspace }}/bin:/usr/local/go/bin:${{ steps.setup-go.outputs.go-path }}
 
-# on:
-#   push:
-#     branches:
-#       - master
-#   pull_request:
-#     branches:
-#       - master
+      # - name: Compile proto files
+      #   run: |
+      #     mkdir -p gen
+      #     protoc -I ./protos \
+      #       --go_out=gen --go_opt=paths=source_relative \
+      #       --go-grpc_out=gen --go-grpc_opt=paths=source_relative \
+      #       --grpc-gateway_out=gen --grpc-gateway_opt=paths=source_relative \
+      #       ./protos/*.proto
 
-# jobs:
-#   build:
-#     runs-on: ubuntu-latest
+      #!! Docker 
+      # - name: Set up Docker Compose
+      #   run: sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+      #   run: sudo chmod +x /usr/local/bin/docker-compose
 
-#     services:
-#       mysql:
-#         image: mysql:8.0
-#         env:
-#           MYSQL_ROOT_PASSWORD: password
-#           MYSQL_DATABASE: testdb
-#           MYSQL_USER: user
-#           MYSQL_PASSWORD: password
-#         ports:
-#           - 3306:3306
-#         options: >-
-#           --health-cmd "mysqladmin ping -user -password"
-#           --health-interval 10s
-#           --health-timeout 5s
-#           --health-retries 5
+      # - name: Build and start services
+      #   run: docker-compose -f docker-compose.yml up -d --build
 
-#     steps:
-#     - name: Checkout code
-#       uses: actions/checkout@v2
-
-#     - name: Set up Go
-#       uses: actions/setup-go@v2
-#       with:
-#         go-version: 1.20
-
-#     - name: Install dependencies
-#       run: go mod download
-
-#     - name: Wait for MySQL to be healthy
-#       run: |
-#         for i in `seq 1 30`; do
-#           nc -z localhost 3306 && echo Success && exit 0
-#           echo -n .
-#           sleep 1
-#         done
-#         echo Failed waiting for MySQL && exit 1
-
-#     - name: Run migrations and tests
-#       env:
-#         DATABASE_URL: "user:password@tcp(localhost:3306)/testdb?parseTime=true"
-#       run: go run main.go &
-#           go test -v ./...
+      # - name: Wait for services to be healthy
+      #   run: |
+      #     for i in {1..30}; do
+      #       if docker-compose -f docker-compose.yml ps | grep "healthy"; then
+      #         echo "Services are healthy"
+      #         exit 0
+      #       fi
+      #       echo "Waiting for services to be healthy..."
+      #       sleep 10
+      #     done
+      #     echo "Services did not become healthy in time" && exit 1

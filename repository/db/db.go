@@ -13,28 +13,38 @@ type mysqlDB struct {
 
 func (m *mysqlDB) DB() *sql.DB {
 	return m.db
-}	
+}
 
-func NewMySQLDB(dataSourceName string) (*mysqlDB, error) {
+const (
+	retryAttempts = 3
+	sleepDuration = 2 * time.Second
+)
+
+func NewMySQLDB() (*mysqlDB, error) {
+
+	dsn := "user:password@tcp(localhost:3306)/testdb?parseTime=true"
 	var db *sql.DB
 	var err error
 
-	for i := 0; i < 3; i++ { // Retry logic
-		db, err = sql.Open("mysql", dataSourceName)
+	for i := 0; i < retryAttempts; i++ { // Retry logic
+		db, err = sql.Open("mysql", dsn)
 		if err != nil {
 			log.Printf("Attempt %d: failed to open database: %v", i+1, err)
-			time.Sleep(2 * time.Second) // Wait before retrying
+			time.Sleep(sleepDuration) // Wait before retrying
 			continue
 		}
+		defer db.Close()
 
 		err = db.Ping()
 		if err == nil {
+			db.SetMaxOpenConns(10)           // Example of setting max open connections
+			db.SetMaxIdleConns(5)            // Example of setting max idle connections
+			db.SetConnMaxLifetime(time.Hour) // Example of setting connection max lifetime
 			break
 		}
 
 		log.Printf("Attempt %d: failed to ping database: %v", i+1, err)
-		db.Close()                  // Ensure the database connection is closed if ping fails
-		time.Sleep(2 * time.Second) // Wait before retrying
+		time.Sleep(sleepDuration) // Wait before retrying
 	}
 
 	if err != nil {
