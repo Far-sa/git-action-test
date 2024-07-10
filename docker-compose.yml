@@ -1,6 +1,21 @@
 version: "3.8"
 
 services:
+  traefik:
+    image: traefik:v2.4
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--entrypoints.web.address=:8080"
+    ports:
+      # - "80:80"
+      - "8090:8090"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - ./traefik/traefik.yml:/etc/traefik/traefik.yml
+      - ./traefik/dynamic.yml:/etc/traefik/dynamic.yml
+
+
   mysql:
     image: mysql:8.0
     environment:
@@ -41,6 +56,10 @@ services:
       - mynetwork
     volumes:
       - ./database/migrations:/app/database/migrations
+    labels:
+      - "traefik.enable=true"
+      # - "traefik.http.routers.user-service.rule=Host(`localhost`)"
+      # - "traefik.http.services.user-service.loadbalancer.server.port=8081"
 
 
 networks:

@@ -27,5 +27,6 @@ func (r *MySQLUserRepository) FindByEmail(email string) (*entity.User, error) {
 	// 	}
 	// 	return nil, err
 	// }
+	panic("not implemented")
 	return &entity.User{}, nil
 }

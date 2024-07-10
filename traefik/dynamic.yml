@@ -1,0 +1,13 @@
+# dynamic.yml
+http:
+  routers:
+    user-service:
+      rule: "Host(`localhost`)"
+      service: user-service
+      entryPoints:
+        - web
+  services:
+    user-service:
+      loadBalancer:
+        servers:
+          - url: "http://user-service:8081"
