@@ -61,3 +61,7 @@ func (db *mysqlDB) Exec(query string, args ...interface{}) (sql.Result, error) {
 func (db *mysqlDB) Get(dest interface{}, query string, args ...interface{}) error {
 	return db.db.QueryRow(query, args...).Scan(dest)
 }
+
+func (db *mysqlDB) Prepare(query string) (*sql.Stmt, error) {
+	return db.db.Prepare(query)
+}

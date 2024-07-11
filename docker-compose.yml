@@ -6,7 +6,7 @@ services:
     command:
       - "--api.insecure=true"
       - "--providers.docker=true"
-      - "--entrypoints.web.address=:8080"
+      - "--entrypoints.web.address=:8090"
     ports:
       # - "80:80"
       - "8090:8090"
@@ -14,7 +14,13 @@ services:
       - "/var/run/docker.sock:/var/run/docker.sock"
       - ./traefik/traefik.yml:/etc/traefik/traefik.yml
       - ./traefik/dynamic.yml:/etc/traefik/dynamic.yml
-
+    labels:
+      - "traefik.enable=true"
+    depends_on:
+      - user-service # Traefik waits for user-service to be ready
+    restart: unless-stopped
+    networks:
+      - mynetwork
 
   mysql:
     image: mysql:8.0
@@ -46,26 +52,28 @@ services:
   user-service:
     build: .
     ports:
-      - "8080:8080"
+      - "8081:8081"
     depends_on:
       mysql:
         condition: service_healthy
     environment:
       - DATABASE_URL=user:password@tcp(mysql:3306)/testdb?parseTime=true
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/health"] # Replace with your health endpoint
+      interval: 10s # Check every 10 seconds
+      retries: 5
     networks:
       - mynetwork
     volumes:
       - ./database/migrations:/app/database/migrations
     labels:
       - "traefik.enable=true"
-      # - "traefik.http.routers.user-service.rule=Host(`localhost`)"
-      # - "traefik.http.services.user-service.loadbalancer.server.port=8081"
-
+      - "traefik.http.routers.user-service.rule=Host(`localhost`)"
+      - "traefik.http.services.user-service.loadbalancer.server.port=8081"
+    restart: unless-stopped
 
 networks:
   mynetwork:
-
-
 
   # user-service:
   #   build: .
@@ -85,4 +93,3 @@ networks:
   #     - mynetwork
   #   volumes:
   #     - ./database/migrations:/migrations
-

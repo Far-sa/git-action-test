@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"database/sql"
+	"errors"
 	"test-cicd/entity"
 	"test-cicd/port"
 )
@@ -14,19 +16,25 @@ func NewMySQLUserRepository(db port.Database) *MySQLUserRepository {
 }
 
 func (r *MySQLUserRepository) Save(user *entity.User) error {
-	_, err := r.db.Exec("INSERT INTO users (username, email, password) VALUES (?, ?, ?)", user.Username, user.Email, user.Password)
+	stmt, err := r.db.Prepare("INSERT INTO users (username, email, password) VALUES (?, ?, ?)")
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(user.Username, user.Email, user.Password)
 	return err
 }
 
 func (r *MySQLUserRepository) FindByEmail(email string) (*entity.User, error) {
-	// row := r.db.Get("SELECT id, username, email, password FROM users WHERE email = ?", email)
-	// user := &entity.User{}
-	// if err := row.Scan(&user.ID, &user.Username, &user.Email, &user.Password); err != nil {
-	// 	if errors.Is(err, sql.ErrNoRows) {
-	// 		return nil, nil
-	// 	}
-	// 	return nil, err
-	// }
-	panic("not implemented")
-	return &entity.User{}, nil
+	user := &entity.User{}
+	query := "SELECT id, username, email, password FROM users WHERE email = ?"
+
+	if err := r.db.Get(user, query, email); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return user, nil
 }

@@ -8,6 +8,7 @@ import (
 type Database interface {
 	Exec(query string, args ...interface{}) (sql.Result, error)
 	Get(dest interface{}, query string, args ...interface{}) error
+	Prepare(query string) (*sql.Stmt, error)
 }
 
 type UserRepository interface {
