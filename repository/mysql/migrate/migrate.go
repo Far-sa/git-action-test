@@ -29,6 +29,15 @@ func NewMySQLMigrator(db *sql.DB) Migrator {
 
 // Up performs the database migration.
 func (m *MySQLMigrator) Up(path string) error {
+
+	// Open a new connection to the database
+	// dsn := "user:password@tcp(localhost:3306)/testdb?parseTime=true"
+	// db, err := sql.Open("mysql", dsn) // Replace "connectionString" with your actual connection string
+	// if err != nil {
+	// 	return fmt.Errorf("failed to open database connection: %w", err)
+	// }
+	// defer db.Close() // Close the connection after use
+
 	driver, err := mysql.WithInstance(m.db, &mysql.Config{}) // Initialize MySQL driver
 	if err != nil {
 		return fmt.Errorf("failed to initialize MySQL driver: %w", err)
@@ -40,11 +49,8 @@ func (m *MySQLMigrator) Up(path string) error {
 		"mysql",
 		driver,
 	)
-	if err != nil {
-		return fmt.Errorf("failed to create migration instance: %w", err)
-	}
 
-	if err := migrationInstance.Up(); err != nil {
+	if err := migrationInstance.Up(); err != nil && err != migrate.ErrNoChange {
 		return fmt.Errorf("failed to run migrations up: %w", err)
 	}
 

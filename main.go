@@ -3,9 +3,9 @@ package main
 import (
 	"fmt"
 	"log"
-	"net/http"
 	"path"
 	"runtime"
+	"test-cicd/handler"
 	"test-cicd/repository/db"
 	repository "test-cicd/repository/mysql"
 	"test-cicd/repository/mysql/migrate"
@@ -13,7 +13,7 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
-	"github.com/gorilla/mux"
+	"github.com/labstack/echo/v4"
 )
 
 func main() {
@@ -48,20 +48,15 @@ func main() {
 
 	userRepo := repository.NewMySQLUserRepository(dbWrapper)
 	userService := service.NewUserService(userRepo)
+	userHandler := handler.NewUserHandler(userService)
 
-	r := mux.NewRouter()
-	r.HandleFunc("/register", func(w http.ResponseWriter, r *http.Request) {
-		username := r.FormValue("username")
-		email := r.FormValue("email")
-		password := r.FormValue("password")
+	e := echo.New()
 
-		if err := userService.RegisterUser(username, email, password); err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		w.WriteHeader(http.StatusCreated)
-	}).Methods("POST")
+	// Define routes
+	e.POST("/register", userHandler.Register)
 
+	// Start server
 	fmt.Println("server is starting..")
-	log.Fatal(http.ListenAndServe(":8081", r))
+	e.Start(":8081")
+
 }

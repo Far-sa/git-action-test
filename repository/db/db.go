@@ -33,7 +33,6 @@ func NewMySQLDB() (*mysqlDB, error) {
 			time.Sleep(sleepDuration) // Wait before retrying
 			continue
 		}
-		defer db.Close()
 
 		err = db.Ping()
 		if err == nil {
@@ -45,6 +44,8 @@ func NewMySQLDB() (*mysqlDB, error) {
 
 		log.Printf("Attempt %d: failed to ping database: %v", i+1, err)
 		time.Sleep(sleepDuration) // Wait before retrying
+
+		defer db.Close()
 	}
 
 	if err != nil {
