@@ -1,1 +1,6 @@
 curl -X POST http://localhost:8090/register -d '{"username":"testuser", "password":"testpass"}' -H "Content-Type: application/json"
+http://localhost:8090/dashboard/
+
+docker-compose down
+docker network prune
+docker-compose up -d --build

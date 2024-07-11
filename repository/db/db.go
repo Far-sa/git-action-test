@@ -22,7 +22,7 @@ const (
 
 func NewMySQLDB() (*mysqlDB, error) {
 
-	dsn := "user:password@tcp(localhost:3306)/testdb?parseTime=true"
+	dsn := "user:password@tcp(mysql:3306)/testdb?parseTime=true"
 	var db *sql.DB
 	var err error
 
