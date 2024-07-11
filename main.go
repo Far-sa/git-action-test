@@ -57,6 +57,6 @@ func main() {
 
 	// Start server
 	fmt.Println("server is starting..")
-	e.Start(":8081")
+	e.Start(":3000")
 
 }

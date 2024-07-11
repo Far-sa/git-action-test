@@ -9,15 +9,17 @@ services:
       - "--entrypoints.web.address=:8090"
       - "--api.dashboard=true" # Enable dashboard
     ports:
-      - "8090:8090"
+      - "8090:8090" # Ensure this matches the entrypoint port
+      - "8081:8081" # For Traefik dashboard
+
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
       - ./traefik/traefik.yml:/etc/traefik/traefik.yml
       - ./traefik/dynamic.yml:/etc/traefik/dynamic.yml
     labels:
       - "traefik.enable=true"
-    depends_on:
-      - user-service # Traefik waits for user-service to be ready
+    # depends_on:
+    #   - user-service # Traefik waits for user-service to be ready
     restart: unless-stopped
     networks:
       - mynetwork
@@ -49,31 +51,32 @@ services:
     volumes:
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
 
-  user-service:
-    build: .
-    ports:
-      - "8081:8081"
-    depends_on:
-      mysql:
-        condition: service_healthy
-    environment:
-      - DATABASE_URL=user:password@tcp(mysql:3306)/testdb?parseTime=true
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8081/health"] # Replace with your health endpoint
-      interval: 10s # Check every 10 seconds
-      retries: 5
-    networks:
-      - mynetwork
-    volumes:
-      - ./database/migrations:/app/database/migrations
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.user-service.rule=Host(`localhost`)"
-      - "traefik.http.services.user-service.loadbalancer.server.port=8081"
-    restart: unless-stopped
+  # user-service:
+  #   build: .
+  #   ports:
+  #     - "8081:8081"
+  #   depends_on:
+  #     mysql:
+  #       condition: service_healthy
+  #   environment:
+  #     - DATABASE_URL=user:password@tcp(mysql:3306)/testdb?parseTime=true
+  #   healthcheck:
+  #     test: ["CMD", "curl", "-f", "http://localhost:8081/health"] # Replace with your health endpoint
+  #     interval: 10s # Check every 10 seconds
+  #     retries: 5
+  #   networks:
+  #     - mynetwork
+  #   volumes:
+  #     - ./database/migrations:/app/database/migrations
+  #   labels:
+  #     - "traefik.enable=true"
+  #     - "traefik.http.routers.user-service.rule=Host(`localhost`)"
+  #     - "traefik.http.services.user-service.loadbalancer.server.port=8081"
+  #   restart: unless-stopped
 
 networks:
   mynetwork:
+    external: true
 
   # user-service:
   #   build: .
