@@ -6,7 +6,7 @@ import (
 	"net"
 
 	//	pb "common/order"
-	pb "generated-proto/proto/order"
+	pb "common/genproto/common/protos/order"
 
 	"google.golang.org/grpc"
 )
@@ -15,9 +15,8 @@ type orderServiceServer struct {
 	pb.UnimplementedOrderServiceServer
 }
 
-func (s *orderServiceServer) GetOrder(ctx context.Context, req *pb.OrderRequest) (*pb.OrderResponse, error) {
-	order := req.OrderId
-	return &pb.OrderResponse{OrderId: order}, nil
+func (s *orderServiceServer) GetOrder(ctx context.Context, req *pb.GetOrderRequest) (*pb.GetOrderResponse, error) {
+	return &pb.GetOrderResponse{Id: req.Id, Item: "book1"}, nil
 }
 
 func main() {
