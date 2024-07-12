@@ -4,13 +4,13 @@ package user;
 import "google/api/annotations.proto";
 
 
-option go_package = "github.com/Far-sa/commons/api/user";
+option go_package = "common/user";
 
 
 service UserService {
   rpc GetUser (GetUserRequest) returns (GetUserResponse){
     option (google.api.http) = {
-      get: "/v1/users/"
+      get: "/v1/users"
     };
   };
 }
