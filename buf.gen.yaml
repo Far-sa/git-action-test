@@ -1,0 +1,16 @@
+
+version: v1
+plugins:
+  - name: go
+    out: common/genproto
+    opt:
+      - paths=source_relative
+  - name: go-grpc
+    out: common/genproto
+    opt:
+      - paths=source_relative
+  - name: grpc-gateway
+    out: common/genproto
+    opt:
+      - paths=source_relative
+      - generate_unbound_methods=true

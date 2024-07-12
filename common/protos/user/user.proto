@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package user;
+import "google/api/annotations.proto";
+
+
+option go_package = "github.com/Far-sa/commons/api/user";
+
+
+service UserService {
+  rpc GetUser (GetUserRequest) returns (GetUserResponse){
+    option (google.api.http) = {
+      get: "/v1/users/"
+    };
+  };
+}
+
+message GetUserRequest {
+  string id = 1;
+}
+
+message GetUserResponse {
+  string id = 1;
+  string name = 2;
+}

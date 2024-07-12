@@ -49,7 +49,7 @@ services:
     networks:
       - mynetwork
     volumes:
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./user-service/script/init.sql:/docker-entrypoint-initdb.d/init.sql
 
   # user-service:
   #   build: .
