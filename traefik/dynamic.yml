@@ -1,14 +1,29 @@
-# dynamic.yml
 http:
   routers:
-    user-service:
-      rule: "Host(`localhost`)"
-      service: user-service
+    gateway:
+      rule: "PathPrefix(`localhost`)" 
+      service: gateway-service
       entryPoints:
         - web
+
   services:
-    user-service:
+    gateway:
       loadBalancer:
         servers:
-          #url: "http://user-service:8081"
-          - url: "http://host.docker.internal:3000"
+          #- url: "http://gateway:5000"
+          - url: "http://host.docker.internal:5000"
+
+#! for user-service-http dynamic.yml
+# http:
+#   routers:
+#     user-service:
+#       rule: "Host(`localhost`)"
+#       service: user-service
+#       entryPoints:
+#         - web
+#   services:
+#     user-service:
+#       loadBalancer:
+#         servers:
+#           #url: "http://user-service:8081"
+#           - url: "http://host.docker.internal:3000"

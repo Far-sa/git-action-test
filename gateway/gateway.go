@@ -31,11 +31,6 @@ func main() {
 		log.Fatalf("Failed to start HTTP gateway for OrderService: %v", err)
 	}
 
-	// Forward /authenticate to AuthService via Traefik
-	mux.HandlePath("POST", "/auth", func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
-		http.Redirect(w, r, "http://traefik/authenticate", http.StatusTemporaryRedirect)
-	})
-
 	log.Println("Serving gRPC-Gateway on http://localhost:5000")
 	if err := http.ListenAndServe(":5000", mux); err != nil {
 		log.Fatalf("Failed to serve HTTP gateway: %v", err)
